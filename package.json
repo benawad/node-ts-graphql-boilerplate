@@ -1,0 +1,23 @@
+{
+  "name": "node-ts-graphql-boilerplate",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon --exec ts-node src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/ws": "^4.0.1",
+    "nodemon": "^1.17.1",
+    "ts-node": "^5.0.1",
+    "tslint": "^5.9.1",
+    "tslint-config-prettier": "^1.9.0",
+    "typescript": "^2.7.2"
+  },
+  "dependencies": {
+    "graphql-yoga": "^1.4.3"
+  }
+}
