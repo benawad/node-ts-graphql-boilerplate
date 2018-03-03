@@ -1,18 +1,19 @@
-import {Entity, PrimaryGeneratedColumn, Column} from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 
 @Entity()
 export class User {
+  @PrimaryGeneratedColumn() id: number;
 
-    @PrimaryGeneratedColumn()
-    id: number;
+  @Column({ type: "text", unique: true })
+  email: string;
 
-    @Column()
-    firstName: string;
+  @Column({ type: "bool", default: false })
+  confirmed: boolean;
 
-    @Column()
-    lastName: string;
+  @Column({ type: "varchar", length: "230" })
+  firstName: string;
 
-    @Column()
-    age: number;
+  @Column("text") lastName: string;
 
+  @Column() age: number;
 }
