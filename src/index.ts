@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { GraphQLServer } from "graphql-yoga";
-import { createConnection, getConnection } from "typeorm";
+import { createConnection } from "typeorm";
 import { ResolverMap } from "./types/ResolverType";
 import { User } from "./entity/User";
 import { Profile } from "./entity/Profile";
