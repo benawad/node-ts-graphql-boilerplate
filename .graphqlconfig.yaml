@@ -1,0 +1,9 @@
+projects:
+  app:
+    schemaPath: src/schema.graphql
+    extensions:
+      prepare-binding:
+        output: src/generated/prisma.ts
+        generator: binding-ts
+      endpoints:
+        default: 'http://localhost:4000'

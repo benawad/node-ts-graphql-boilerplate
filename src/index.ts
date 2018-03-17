@@ -1,41 +1,15 @@
 import "reflect-metadata";
 import { GraphQLServer } from "graphql-yoga";
 import { createConnection } from "typeorm";
+import typeDefs from "./schema.graphql";
+
 import { ResolverMap } from "./types/ResolverType";
 import { User } from "./entity/User";
 import { Profile } from "./entity/Profile";
 
-const typeDefs = `
-  type User {
-    id: Int!
-    firstName: String!
-    profile: Profile
-  }
-
-  type Profile {
-    favoriteColor: String!
-  }
-
-  type Query {
-    hello(name: String): String!
-    user(id: Int!): User!
-    users: [User!]!
-  }
-
-  input ProfileInput {
-    favoriteColor: String!
-  }
-
-  type Mutation {
-    createUser(firstName: String!, profile: ProfileInput): User!
-    updateUser(id: Int!, firstName: String): Boolean
-    deleteUser(id: Int!): Boolean
-  }
-`;
-
 const resolvers: ResolverMap = {
   Query: {
-    hello: (_: any, { name }: any) => `hhello ${name || "World"}`,
+    hello: (_, { name }) => `hhello ${name || "World"}`,
     user: async (_, { id }) => {
       const user = await User.findOneById(id, { relations: ["profile"] });
       console.log(user);
