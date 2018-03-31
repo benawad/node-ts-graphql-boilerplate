@@ -1,14 +1,17 @@
 import "reflect-metadata";
 import { GraphQLServer } from "graphql-yoga";
 import { createConnection } from "typeorm";
+import { importSchema } from "graphql-import";
+import * as path from "path";
 // tslint:disable-next-line:no-submodule-imports
 // import { IResolvers } from "graphql-yoga/dist/src/types";
-
-import typeDefs from "./schema.graphql";
 
 import { User } from "./entity/User";
 import { Profile } from "./entity/Profile";
 import { ResolverMap } from "./types/ResolverType";
+
+const typeDefs = importSchema(path.join(__dirname, "./schema.graphql"));
+import { GQL } from "./generated/schema";
 
 const resolvers: ResolverMap = {
   Query: {
@@ -45,11 +48,13 @@ const resolvers: ResolverMap = {
       return user;
     },
     updateUser: async (
-      _: any,
-      { id, ...args }: GQL.IUpdateUserOnMutationArguments
+      _,
+      { id, firstName }: GQL.IUpdateUserOnMutationArguments
     ) => {
       try {
-        await User.updateById(id, args);
+        await User.updateById(id, {
+          firstName: firstName || undefined
+        });
       } catch (err) {
         console.log(err);
         return false;
