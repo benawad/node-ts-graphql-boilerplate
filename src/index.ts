@@ -9,6 +9,7 @@ import * as bodyParser from "body-parser";
 import { makeExecutableSchema } from "graphql-tools";
 import { graphqlExpress } from "apollo-server-express";
 import expressPlayground from "graphql-playground-middleware-express";
+import * as cors from "cors";
 
 import { User } from "./entity/User";
 import { ResolverMap } from "./types/ResolverType";
@@ -42,7 +43,7 @@ const resolvers: ResolverMap = {
 
       res.cookie("id", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV !== "development",
+        secure: process.env.NODE_ENV === "production",
         maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
       });
 
@@ -60,7 +61,13 @@ const schema = makeExecutableSchema({
   resolvers
 });
 
-// bodyParser is needed just for POST.
+app.use(
+  cors({
+    credentials: true,
+    origin: "http://localhost:3000"
+  })
+);
+
 app.use(
   "/graphql",
   bodyParser.json(),
@@ -69,6 +76,7 @@ app.use(
     context: { res }
   }))
 );
+
 app.get("/playground", expressPlayground({ endpoint: "/graphql" }));
 
 app.listen(4000);
