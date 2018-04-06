@@ -19,7 +19,7 @@ input ProfileInput {
 }
 
 type Mutation {
-  createUser(firstName: String!, profile: ProfileInput): User!
   updateUser(id: Int!, firstName: String): Boolean
   deleteUser(id: Int!): Boolean
+  register(username: String!, password: String!): Boolean!
 }

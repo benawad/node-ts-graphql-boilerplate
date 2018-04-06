@@ -1,92 +1,78 @@
 import "reflect-metadata";
-import { GraphQLServer } from "graphql-yoga";
 import { createConnection } from "typeorm";
 import { importSchema } from "graphql-import";
+import * as bcrypt from "bcryptjs";
 import * as path from "path";
-// tslint:disable-next-line:no-submodule-imports
-// import { IResolvers } from "graphql-yoga/dist/src/types";
+import * as jwt from "jsonwebtoken";
+import * as express from "express";
+import * as bodyParser from "body-parser";
+import { makeExecutableSchema } from "graphql-tools";
+import { graphqlExpress } from "apollo-server-express";
+import expressPlayground from "graphql-playground-middleware-express";
 
 import { User } from "./entity/User";
-import { Profile } from "./entity/Profile";
 import { ResolverMap } from "./types/ResolverType";
 
-const typeDefs = importSchema(path.join(__dirname, "./schema.graphql"));
 import { GQL } from "./generated/schema";
+
+const SALT = 12;
+const JWT_SECRET = "aslkdfjaklsjdflk";
 
 const resolvers: ResolverMap = {
   Query: {
     hello: (_, { name }: GQL.IHelloOnQueryArguments) =>
-      `hhello ${name || "World"}`,
-    user: async (_, { id }: GQL.IUserOnQueryArguments) => {
-      const user = await User.findOneById(id, { relations: ["profile"] });
-      console.log(user);
-
-      return user;
-    },
-    users: async () => {
-      const users = await User.find({ relations: ["profile"] });
-
-      console.log(users);
-      return users;
-    }
+      `hhello ${name || "World"}`
   },
   Mutation: {
-    createUser: async (_, args: GQL.ICreateUserOnMutationArguments) => {
-      const profile = Profile.create({ ...args.profile });
-      await profile.save();
-
+    register: async (_, args, { res }) => {
+      const password = await bcrypt.hash(args.password, SALT);
       const user = User.create({
-        firstName: args.firstName
+        username: args.username,
+        password
       });
-
-      user.profile = profile;
-
       await user.save();
 
-      console.log(user);
+      const token = jwt.sign(
+        {
+          uerId: user.id
+        },
+        JWT_SECRET,
+        { expiresIn: "7d" }
+      );
 
-      return user;
-    },
-    updateUser: async (
-      _,
-      { id, firstName }: GQL.IUpdateUserOnMutationArguments
-    ) => {
-      try {
-        await User.updateById(id, {
-          firstName: firstName || undefined
-        });
-      } catch (err) {
-        console.log(err);
-        return false;
-      }
-
-      return true;
-    },
-    deleteUser: async (_, { id }: GQL.IDeleteUserOnMutationArguments) => {
-      try {
-        await User.removeById(id);
-        // const deleteQuery = getConnection()
-        //   .createQueryBuilder()
-        //   .delete()
-        //   .from(User)
-        //   .where("id = :id", { id });
-
-        // if (id === 1) {
-        //   deleteQuery.andWhere("email = :email", { email: "bob@bob.com" });
-        // }
-
-        // await deleteQuery.execute();
-      } catch (err) {
-        console.log(err);
-        return false;
-      }
+      res.cookie("id", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== "development",
+        maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
+      });
 
       return true;
     }
   }
 };
 
-const server = new GraphQLServer({ typeDefs, resolvers });
+const app = express();
+
+const typeDefs = importSchema(path.join(__dirname, "./schema.graphql"));
+
+const schema = makeExecutableSchema({
+  typeDefs,
+  resolvers
+});
+
+// bodyParser is needed just for POST.
+app.use(
+  "/graphql",
+  bodyParser.json(),
+  graphqlExpress((_, res) => ({
+    schema,
+    context: { res }
+  }))
+);
+app.get("/playground", expressPlayground({ endpoint: "/graphql" }));
+
+app.listen(4000);
+
 createConnection().then(() => {
-  server.start(() => console.log("Server is running on localhost:4000"));
+  app.listen(() => console.log("Server is running on localhost:4000"));
 });

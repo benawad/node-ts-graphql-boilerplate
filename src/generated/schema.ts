@@ -49,14 +49,9 @@ export declare namespace GQL {
 
   interface IMutation {
     __typename: "Mutation";
-    createUser: IUser;
     updateUser: boolean | null;
     deleteUser: boolean | null;
-  }
-
-  interface ICreateUserOnMutationArguments {
-    firstName: string;
-    profile?: IProfileInput | null;
+    register: boolean;
   }
 
   interface IUpdateUserOnMutationArguments {
@@ -66,6 +61,11 @@ export declare namespace GQL {
 
   interface IDeleteUserOnMutationArguments {
     id: number;
+  }
+
+  interface IRegisterOnMutationArguments {
+    username: string;
+    password: string;
   }
 
   interface IProfileInput {
