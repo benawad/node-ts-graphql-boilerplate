@@ -1,25 +1,7 @@
-type User {
-  id: Int!
-  firstName: String!
-  profile: Profile
-}
-
-type Profile {
-  favoriteColor: String!
-}
-
 type Query {
   hello(name: String): String!
-  user(id: Int!): User!
-  users: [User!]!
-}
-
-input ProfileInput {
-  favoriteColor: String!
 }
 
 type Mutation {
-  updateUser(id: Int!, firstName: String): Boolean
-  deleteUser(id: Int!): Boolean
   register(username: String!, password: String!): Boolean!
 }

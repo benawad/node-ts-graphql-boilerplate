@@ -35,7 +35,7 @@ const resolvers: ResolverMap = {
 
       const token = jwt.sign(
         {
-          uerId: user.id
+          userId: user.id
         },
         JWT_SECRET,
         { expiresIn: "7d" }
