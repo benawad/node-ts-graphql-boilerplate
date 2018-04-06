@@ -77,13 +77,14 @@ app.use(
   "/graphql",
   bodyParser.json(),
   cookieParser(),
-  (req: any) => {
+  (req: any, _, next) => {
     try {
       const { userId }: any = jwt.verify(req.cookies.id, JWT_SECRET);
       req.userId = userId;
     } catch (err) {
       console.log(err);
     }
+    return next();
   },
   graphqlExpress((req: any, res) => ({
     schema,
