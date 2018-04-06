@@ -10,19 +10,24 @@ import { makeExecutableSchema } from "graphql-tools";
 import { graphqlExpress } from "apollo-server-express";
 import expressPlayground from "graphql-playground-middleware-express";
 import * as cors from "cors";
+import * as cookieParser from "cookie-parser";
 
 import { User } from "./entity/User";
 import { ResolverMap } from "./types/ResolverType";
-
-import { GQL } from "./generated/schema";
 
 const SALT = 12;
 const JWT_SECRET = "aslkdfjaklsjdflk";
 
 const resolvers: ResolverMap = {
   Query: {
-    hello: (_, { name }: GQL.IHelloOnQueryArguments) =>
-      `hhello ${name || "World"}`
+    hello: () => `Hello World!`,
+    authHello: (_, __, { userId }) => {
+      if (userId) {
+        return `Cookie found! Your id is: ${userId}`;
+      } else {
+        return "Could not find cookie :(";
+      }
+    }
   },
   Mutation: {
     register: async (_, args, { res }) => {
@@ -71,9 +76,18 @@ app.use(
 app.use(
   "/graphql",
   bodyParser.json(),
-  graphqlExpress((_, res) => ({
+  cookieParser(),
+  (req: any) => {
+    try {
+      const { userId }: any = jwt.verify(req.cookies.id, JWT_SECRET);
+      req.userId = userId;
+    } catch (err) {
+      console.log(err);
+    }
+  },
+  graphqlExpress((req: any, res) => ({
     schema,
-    context: { res }
+    context: { res, userId: req.userId }
   }))
 );
 
