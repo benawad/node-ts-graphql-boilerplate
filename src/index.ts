@@ -65,7 +65,7 @@ app.use(
     name: "qid",
     secret: SESSION_SECRET,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -77,9 +77,13 @@ app.use(
 app.use(
   "/graphql",
   bodyParser.json(),
-  graphqlExpress((req: any, res) => ({
+  (req, _, next) => {
+    console.log(req.session);
+    return next();
+  },
+  graphqlExpress(req => ({
     schema,
-    context: { res, userId: req.userId }
+    context: { req }
   }))
 );
 
